@@ -1,0 +1,21 @@
+# Секреты — никогда в git
+*.env
+.env
+*.bak
+*.bak-*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+tests/.venv/
+
+# Временные артефакты
+/tmp/
+*.log
+
+# IDE / OS
+.DS_Store
+*.swp
+*~

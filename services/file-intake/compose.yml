@@ -1,0 +1,43 @@
+services:
+  file-intake:
+    build: ./app
+    container_name: file-intake
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8090"
+    env_file:
+      - .env
+    environment:
+      - WHISPER_URL=http://whisper:8091
+      # Trilium ETAPI integration (optional — leave empty to disable)
+      - TRILIUM_ETAPI=${TRILIUM_ETAPI:-}
+      - TRILIUM_TOKEN_FILE=${TRILIUM_TOKEN_FILE:-}
+      - AUTH_TOKEN=${AUTH_TOKEN:-}
+      # OpenTelemetry (optional — leave OTEL_EXPORTER_OTLP_ENDPOINT empty to disable)
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-file-intake}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES:-}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      - OTEL_TRACES_SAMPLER=${OTEL_TRACES_SAMPLER:-parentbased_always_on}
+      - UPTRACE_PROJECT_TOKEN=${UPTRACE_PROJECT_TOKEN:-}
+    depends_on:
+      whisper:
+        condition: service_healthy
+    mem_limit: 700m
+
+  whisper:
+    build: ./whisper
+    container_name: whisper
+    restart: unless-stopped
+    expose:
+      - "8091"
+    environment:
+      - WHISPER_MODEL=${WHISPER_MODEL:-small}
+      - WHISPER_COMPUTE=${WHISPER_COMPUTE:-int8}
+      - WHISPER_LANGUAGE=${WHISPER_LANGUAGE:-en}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8091/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    mem_limit: 1300m

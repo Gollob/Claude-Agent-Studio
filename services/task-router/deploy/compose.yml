@@ -1,0 +1,23 @@
+services:
+  task-router:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    image: task-router:latest
+    container_name: task-router
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8092:8092"
+    env_file: ~/.config/task-router.env
+    volumes:
+      - task-router-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8092/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  task-router-data:
+    name: task-router-data

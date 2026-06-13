@@ -1,0 +1,15 @@
+anthropic>=0.40.0
+python-telegram-bot==21.10
+pillow>=10.0.0
+pillow-heif>=0.16.0
+httpx>=0.27.0
+aiofiles>=23.0.0
+fastapi>=0.115.0
+uvicorn>=0.30.0
+python-multipart>=0.0.9
+# OpenTelemetry instrumentation (ADR-005/ADR-006/ADR-007)
+opentelemetry-sdk>=1.25.0
+opentelemetry-exporter-otlp-proto-grpc>=1.25.0
+opentelemetry-instrumentation-fastapi>=0.46b0
+opentelemetry-instrumentation-httpx>=0.46b0
+opentelemetry-instrumentation-logging>=0.46b0

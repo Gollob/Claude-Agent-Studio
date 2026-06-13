@@ -1,0 +1,7 @@
+*.env
+/task-router
+*.db
+*.sqlite*
+__pycache__/
+.DS_Store
+*.log

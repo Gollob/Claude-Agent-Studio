@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Upload — Agent Studio</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #111; color: #ccc; font-family: system-ui, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 32px; width: 100%; max-width: 560px; }
+  h1 { font-size: 1.3rem; color: #fff; margin-bottom: 8px; }
+  p  { font-size: 0.9rem; color: #888; margin-bottom: 24px; }
+  label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; }
+  input[type=file], input[type=password] {
+    width: 100%; background: #222; border: 1px solid #444; border-radius: 8px;
+    padding: 10px 14px; color: #ccc; font-size: 0.95rem; margin-bottom: 16px;
+  }
+  input[type=file]::-webkit-file-upload-button {
+    background: #333; color: #ccc; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  }
+  button {
+    width: 100%; background: #d97757; color: #fff; border: none; border-radius: 8px;
+    padding: 12px; font-size: 1rem; cursor: pointer; transition: opacity .2s;
+  }
+  button:hover { opacity: .85; }
+  button:disabled { opacity: .5; cursor: default; }
+  #result { margin-top: 24px; background: #222; border: 1px solid #333; border-radius: 8px; padding: 16px; display: none; }
+  #result h2 { font-size: 0.9rem; color: #888; margin-bottom: 10px; }
+  #result pre { white-space: pre-wrap; font-size: 0.88rem; line-height: 1.6; color: #ddd; font-family: inherit; }
+  .note-link { margin-top: 10px; font-size: 0.82rem; color: #888; }
+  .note-link a { color: #d97757; }
+  #spinner { display: none; text-align: center; margin-top: 20px; color: #888; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Upload File</h1>
+  <p>Photo, PDF document or audio recording — the agent will analyze and save it.</p>
+
+  <form id="form">
+    <label for="token">Access token</label>
+    <input type="password" id="token" placeholder="••••••••" autocomplete="current-password">
+
+    <label for="file">File (photo, PDF, audio)</label>
+    <input type="file" id="file" accept="image/*,.pdf,audio/*,.ogg,.mp3,.wav,.m4a">
+
+    <button type="submit" id="btn">Upload</button>
+  </form>
+
+  <div id="spinner">Processing...</div>
+
+  <div id="result">
+    <h2>Result</h2>
+    <pre id="text"></pre>
+    <div class="note-link" id="note-link"></div>
+  </div>
+</div>
+
+<script>
+document.getElementById("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const file  = document.getElementById("file").files[0];
+  const token = document.getElementById("token").value;
+  if (!file) { alert("Please select a file"); return; }
+
+  document.getElementById("btn").disabled = true;
+  document.getElementById("spinner").style.display = "block";
+  document.getElementById("result").style.display  = "none";
+
+  const fd = new FormData();
+  fd.append("file", file);
+
+  try {
+    const resp = await fetch("/process", {
+      method: "POST",
+      headers: token ? { "X-Auth-Token": token } : {},
+      body: fd,
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || resp.statusText);
+
+    document.getElementById("text").textContent = data.text;
+    if (data.note_id) {
+      document.getElementById("note-link").innerHTML =
+        `Saved: <span style="color:#d97757">${data.title}</span> (note_id: ${data.note_id})`;
+    }
+    document.getElementById("result").style.display = "block";
+  } catch (err) {
+    alert("Error: " + err.message);
+  } finally {
+    document.getElementById("btn").disabled = false;
+    document.getElementById("spinner").style.display = "none";
+  }
+});
+</script>
+</body>
+</html>

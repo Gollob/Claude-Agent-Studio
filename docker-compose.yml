@@ -1,0 +1,107 @@
+services:
+  # ── Telegram bot (tgbridge) ───────────────────────────────────────────────
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    container_name: agent-bot
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - AGENT_WORKDIR=${AGENT_WORKDIR:-/agents}
+      - AGENT_IPC_DIR=${AGENT_IPC_DIR:-/tmp/agent-studio}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - FILE_INTAKE_URL=http://file-intake:8090
+    volumes:
+      - agent-ipc:/tmp/agent-studio
+      - ${AGENT_WORKDIR:-./agents}:/agents:ro
+    depends_on:
+      - task-router
+      - file-intake
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; os.path.exists('/tmp/agent-studio')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── Task router (Go) ──────────────────────────────────────────────────────
+  task-router:
+    build:
+      context: ./services/task-router
+      dockerfile: Dockerfile
+    container_name: task-router
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8092:8092"
+    env_file: .env
+    environment:
+      - TR_PORT=8092
+      - TR_CATALOG_PATH=/app/tagcatalog/tags.yaml
+      - TR_SCHEMA_PATH=/app/tagcatalog/tags.schema.json
+      - TR_DB_DSN=file:/data/task-router.db?cache=shared&_journal=WAL
+    volumes:
+      - task-router-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8092/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── File intake (FastAPI + Whisper STT) ───────────────────────────────────
+  file-intake:
+    build:
+      context: ./services/file-intake/app
+      dockerfile: Dockerfile
+    container_name: file-intake
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8090"
+    env_file: .env
+    environment:
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TG_ALLOWED_USER_IDS=${TG_ALLOWED_USER_IDS:-}
+      - AUTH_TOKEN=${AUTH_TOKEN:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - WHISPER_URL=http://whisper:8091
+      - TRILIUM_ETAPI=${TRILIUM_ETAPI:-}
+      - TRILIUM_TOKEN=${TRILIUM_TOKEN:-}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      - OTEL_SERVICE_NAME=file-intake
+      - UPTRACE_PROJECT_TOKEN=${UPTRACE_PROJECT_TOKEN:-}
+    depends_on:
+      whisper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    mem_limit: 700m
+
+  # ── Whisper STT ───────────────────────────────────────────────────────────
+  whisper:
+    build:
+      context: ./services/file-intake/whisper
+      dockerfile: Dockerfile
+    container_name: whisper
+    restart: unless-stopped
+    expose:
+      - "8091"
+    environment:
+      - WHISPER_MODEL=${WHISPER_MODEL:-small}
+      - WHISPER_COMPUTE=${WHISPER_COMPUTE:-int8}
+      - WHISPER_LANGUAGE=${WHISPER_LANGUAGE:-en}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8091/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    mem_limit: 1300m
+
+volumes:
+  agent-ipc:
+  task-router-data:

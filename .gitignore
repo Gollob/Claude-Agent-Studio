@@ -1,0 +1,68 @@
+# Secrets and environment
+.env
+*.env
+*.local
+*.local.yaml
+*.local.yml
+secrets/
+credentials/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Go binaries
+services/task-router/task-router
+services/task-router/bin/
+services/task-router/data/*.db
+services/task-router/data/*.db-shm
+services/task-router/data/*.db-wal
+
+# Node
+node_modules/
+.npm/
+.yarn/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temp
+tmp/
+.tmp/
+
+# Keys and certs
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa
+id_ed25519

@@ -1,0 +1,505 @@
+# tagcatalog/tags.yaml — реестр тегов task-router
+# Источник истины для инвертированного in-memory индекса.
+# ONLY skill-curator может изменять этот файл.
+# Seed: 9 агентов × ~16 тегов × 31 навык.
+# Полный перебор 76 скилов из .claude/skills/ не сделан;
+# охвачены все агенты репрезентативно (>=25 навыков).
+
+# ─────────────────────────────────────────────
+# ТЕГИ
+# canon  — каноническое имя (lower-case, без #)
+# aliases — синонимы (нормализуются -> canon)
+# domain  — golang|python|typescript|db|devops|docs|qa|review|orchestration|security
+# weight  — вес при скоринге (по умолчанию 1.0)
+# ─────────────────────────────────────────────
+tags:
+  - canon: go
+    aliases: [golang, "go-lang"]
+    domain: golang
+    description: "Go-разработка (сервисы, инструменты, библиотеки)"
+    weight: 1.2
+    is_active: true
+
+  - canon: python
+    aliases: [py, python3]
+    domain: python
+    description: "Python-разработка (скрипты, FastAPI, автоматизация)"
+    weight: 1.2
+    is_active: true
+
+  - canon: ts
+    aliases: [typescript, tsc]
+    domain: typescript
+    description: "TypeScript-разработка"
+    weight: 1.1
+    is_active: true
+
+  - canon: react
+    aliases: [reactjs, react.js]
+    domain: typescript
+    description: "React-компоненты и UI"
+    weight: 1.0
+    is_active: true
+
+  - canon: nextjs
+    aliases: [next, next.js]
+    domain: typescript
+    description: "Next.js фреймворк"
+    weight: 1.0
+    is_active: true
+
+  - canon: frontend
+    aliases: [front, ui, web-ui]
+    domain: typescript
+    description: "Фронтенд-разработка"
+    weight: 0.9
+    is_active: true
+
+  - canon: backend
+    aliases: [back, server-side]
+    domain: golang
+    description: "Бэкенд-разработка"
+    weight: 0.9
+    is_active: true
+
+  - canon: docker
+    aliases: [container, containers]
+    domain: devops
+    description: "Docker-контейнеризация"
+    weight: 1.0
+    is_active: true
+
+  - canon: compose
+    aliases: [docker-compose, "docker compose"]
+    domain: devops
+    description: "Docker Compose сервисы"
+    weight: 0.9
+    is_active: true
+
+  - canon: devops
+    aliases: [ops, platform-eng]
+    domain: devops
+    description: "DevOps: деплой, CI/CD, инфраструктура"
+    weight: 1.0
+    is_active: true
+
+  - canon: sql
+    aliases: [query, queries, dml]
+    domain: db
+    description: "SQL-запросы и оптимизация"
+    weight: 1.0
+    is_active: true
+
+  - canon: clickhouse
+    aliases: [ch, "click-house"]
+    domain: db
+    description: "ClickHouse аналитическая БД"
+    weight: 1.2
+    is_active: true
+
+  - canon: sqlite
+    aliases: [sqlite3]
+    domain: db
+    description: "SQLite встраиваемая БД"
+    weight: 1.0
+    is_active: true
+
+  - canon: review
+    aliases: [code-review, pr-review]
+    domain: review
+    description: "Независимое ревью кода"
+    weight: 1.1
+    is_active: true
+
+  - canon: test
+    aliases: [testing, tests, qa]
+    domain: qa
+    description: "Тестирование: unit, integration, e2e"
+    weight: 1.1
+    is_active: true
+
+  - canon: docs
+    aliases: [documentation, doc, kb]
+    domain: docs
+    description: "Документация, ADR, конспекты KB"
+    weight: 0.9
+    is_active: true
+
+  - canon: arch
+    aliases: [architecture, design, spec, adr]
+    domain: orchestration
+    description: "Архитектура, дизайн систем, спеки (OpenSpec)"
+    weight: 1.3
+    is_active: true
+
+  - canon: api
+    aliases: [rest, http-api, openapi, swagger]
+    domain: golang
+    description: "HTTP REST API дизайн и реализация"
+    weight: 1.0
+    is_active: true
+
+  - canon: grpc
+    aliases: [grpc-go, protobuf, proto]
+    domain: golang
+    description: "gRPC протокол и реализация"
+    weight: 1.1
+    is_active: true
+
+  - canon: concurrency
+    aliases: [goroutines, async, parallel, channels]
+    domain: golang
+    description: "Конкурентность, горутины, каналы, sync"
+    weight: 1.0
+    is_active: true
+
+  - canon: perf
+    aliases: [performance, optimization, benchmark, profiling]
+    domain: golang
+    description: "Оптимизация производительности и профилирование"
+    weight: 1.0
+    is_active: true
+
+  - canon: observability
+    aliases: [monitoring, metrics, tracing, logs, otel]
+    domain: devops
+    description: "Наблюдаемость: метрики, трассировка, логи"
+    weight: 1.0
+    is_active: true
+
+  - canon: security
+    aliases: [sec, infosec, auth, authz, authn]
+    domain: security
+    description: "Безопасность: уязвимости, авторизация, аутентификация"
+    weight: 1.1
+    is_active: true
+
+  - canon: ci
+    aliases: [cicd, "ci-cd", pipeline, github-actions]
+    domain: devops
+    description: "CI/CD пайплайны, автоматизация сборки"
+    weight: 0.9
+    is_active: true
+
+  - canon: fastapi
+    aliases: [starlette, uvicorn]
+    domain: python
+    description: "FastAPI веб-фреймворк"
+    weight: 1.1
+    is_active: true
+
+  - canon: db
+    aliases: [database, storage]
+    domain: db
+    description: "Общие вопросы баз данных"
+    weight: 0.8
+    is_active: true
+
+  - canon: microservices
+    aliases: [microservice, svc, services]
+    domain: orchestration
+    description: "Микросервисная архитектура"
+    weight: 1.0
+    is_active: true
+
+  - canon: etl
+    aliases: [pipeline-data, data-pipeline, ingest]
+    domain: db
+    description: "ETL-пайплайны, загрузка и трансформация данных"
+    weight: 1.0
+    is_active: true
+
+  - canon: playwright
+    aliases: [e2e, browser-test, pw]
+    domain: qa
+    description: "End-to-end тесты Playwright"
+    weight: 1.0
+    is_active: true
+
+  - canon: systemd
+    aliases: [service-unit, init-d]
+    domain: devops
+    description: "systemd юниты и автозапуск"
+    weight: 0.9
+    is_active: true
+
+  - canon: nginx
+    aliases: [proxy, reverse-proxy, caddy]
+    domain: devops
+    description: "Nginx/Caddy обратный прокси"
+    weight: 0.9
+    is_active: true
+
+# ─────────────────────────────────────────────
+# АГЕНТЫ
+# agent   — имя агента (совпадает с именем субагента)
+# model   — модель Claude (opus|sonnet)
+# zone    — краткое описание зоны ответственности
+# heavy   — 1 если Opus (тяжёлый по токенам), 0 если Sonnet
+# is_active
+# ─────────────────────────────────────────────
+agents:
+  - agent: architect
+    model: opus
+    zone: "Архитектура: дизайн системы ДО кода, spec-driven (OpenSpec), ADR, декомпозиция"
+    heavy: 1
+    is_active: true
+
+  - agent: python-dev
+    model: sonnet
+    zone: "Python: микросервисы (FastAPI/async), скрипты"
+    heavy: 0
+    is_active: true
+
+  - agent: go-dev
+    model: opus
+    zone: "Go: высоконагруженные сервисы, конкурентность"
+    heavy: 1
+    is_active: true
+
+  - agent: ts-dev
+    model: sonnet
+    zone: "Фронтенд TypeScript/React, Next.js"
+    heavy: 0
+    is_active: true
+
+  - agent: reviewer
+    model: sonnet
+    zone: "Независимое ревью кода (read-only)"
+    heavy: 0
+    is_active: true
+
+  - agent: devops
+    model: sonnet
+    zone: "Docker/Compose, деплой, systemd, nginx, CI"
+    heavy: 0
+    is_active: true
+
+  - agent: db-engineer
+    model: sonnet
+    zone: "ClickHouse: схемы, оптимизация, ETL"
+    heavy: 0
+    is_active: true
+
+  - agent: docs
+    model: sonnet
+    zone: "Конспекты kb/, README, ADR"
+    heavy: 0
+    is_active: true
+
+  - agent: qa-test
+    model: sonnet
+    zone: "Тесты pytest / go test / Vitest / Playwright"
+    heavy: 0
+    is_active: true
+
+# ─────────────────────────────────────────────
+# НАВЫКИ (SKILLS)
+# Репрезентативный набор из ~/agent/dev/.claude/skills/
+# Охвачено 31 навык из 76; пропущенные аналогичны присутствующим.
+# skill   — имя директории навыка (без пути)
+# agent   — владелец (должен быть в agents[])
+# tags    — канонические теги (должны быть в tags[])
+# weight  — приоритет навыка у агента (0.0–2.0)
+# ─────────────────────────────────────────────
+skills:
+  # ── architect ──────────────────────────────
+  - skill: architect
+    agent: architect
+    tags: [arch, microservices, api]
+    weight: 2.0
+    is_active: true
+
+  - skill: architecture-designer
+    agent: architect
+    tags: [arch, microservices]
+    weight: 1.8
+    is_active: true
+
+  - skill: api-design
+    agent: architect
+    tags: [arch, api, docs]
+    weight: 1.5
+    is_active: true
+
+  - skill: microservices-architect
+    agent: architect
+    tags: [arch, microservices, devops]
+    weight: 1.5
+    is_active: true
+
+  # ── go-dev ─────────────────────────────────
+  - skill: golang-how-to
+    agent: go-dev
+    tags: [go, backend]
+    weight: 1.5
+    is_active: true
+
+  - skill: golang-concurrency
+    agent: go-dev
+    tags: [go, concurrency]
+    weight: 1.8
+    is_active: true
+
+  - skill: golang-grpc
+    agent: go-dev
+    tags: [go, grpc, api]
+    weight: 1.8
+    is_active: true
+
+  - skill: golang-performance
+    agent: go-dev
+    tags: [go, perf]
+    weight: 1.6
+    is_active: true
+
+  - skill: golang-observability
+    agent: go-dev
+    tags: [go, observability]
+    weight: 1.5
+    is_active: true
+
+  - skill: golang-testing
+    agent: go-dev
+    tags: [go, test]
+    weight: 1.4
+    is_active: true
+
+  - skill: golang-database
+    agent: go-dev
+    tags: [go, db, sql]
+    weight: 1.3
+    is_active: true
+
+  - skill: golang-project-layout
+    agent: go-dev
+    tags: [go, arch, docs]
+    weight: 1.2
+    is_active: true
+
+  # ── python-dev ─────────────────────────────
+  - skill: python-pro
+    agent: python-dev
+    tags: [python, backend]
+    weight: 2.0
+    is_active: true
+
+  - skill: fastapi-expert
+    agent: python-dev
+    tags: [python, fastapi, api]
+    weight: 1.8
+    is_active: true
+
+  - skill: debugging-wizard
+    agent: python-dev
+    tags: [python, backend]
+    weight: 1.3
+    is_active: true
+
+  # ── ts-dev ─────────────────────────────────
+  - skill: typescript-pro
+    agent: ts-dev
+    tags: [ts, frontend]
+    weight: 2.0
+    is_active: true
+
+  - skill: react-expert
+    agent: ts-dev
+    tags: [ts, react, frontend]
+    weight: 1.8
+    is_active: true
+
+  - skill: nextjs-developer
+    agent: ts-dev
+    tags: [ts, nextjs, react, frontend]
+    weight: 1.8
+    is_active: true
+
+  - skill: javascript-pro
+    agent: ts-dev
+    tags: [ts, frontend]
+    weight: 1.5
+    is_active: true
+
+  # ── reviewer ───────────────────────────────
+  - skill: code-reviewer
+    agent: reviewer
+    tags: [review, security]
+    weight: 2.0
+    is_active: true
+
+  - skill: security-reviewer
+    agent: reviewer
+    tags: [review, security]
+    weight: 1.8
+    is_active: true
+
+  - skill: code-quality
+    agent: reviewer
+    tags: [review]
+    weight: 1.5
+    is_active: true
+
+  # ── devops ─────────────────────────────────
+  - skill: devops-engineer
+    agent: devops
+    tags: [devops, docker, compose]
+    weight: 2.0
+    is_active: true
+
+  - skill: sre-engineer
+    agent: devops
+    tags: [devops, observability, ci]
+    weight: 1.8
+    is_active: true
+
+  - skill: monitoring-expert
+    agent: devops
+    tags: [devops, observability]
+    weight: 1.6
+    is_active: true
+
+  - skill: golang-continuous-integration
+    agent: devops
+    tags: [ci, go, devops]
+    weight: 1.4
+    is_active: true
+
+  # ── db-engineer ────────────────────────────
+  - skill: database-optimizer
+    agent: db-engineer
+    tags: [db, sql, clickhouse]
+    weight: 2.0
+    is_active: true
+
+  - skill: sql-pro
+    agent: db-engineer
+    tags: [sql, db, clickhouse, sqlite]
+    weight: 1.8
+    is_active: true
+
+  # ── docs ───────────────────────────────────
+  - skill: documentation
+    agent: docs
+    tags: [docs, arch]
+    weight: 2.0
+    is_active: true
+
+  - skill: code-documenter
+    agent: docs
+    tags: [docs]
+    weight: 1.8
+    is_active: true
+
+  # ── qa-test ────────────────────────────────
+  - skill: test-master
+    agent: qa-test
+    tags: [test, docs]
+    weight: 2.0
+    is_active: true
+
+  - skill: playwright-expert
+    agent: qa-test
+    tags: [test, playwright, ts]
+    weight: 1.8
+    is_active: true

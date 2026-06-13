@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/claude-agent-studio/task-router/tagcatalog/tags.schema.json",
+  "title": "TagCatalog",
+  "description": "Схема реестра тегов task-router (tags.yaml). Источник истины для in-memory индекса.",
+  "type": "object",
+  "required": ["tags", "skills", "agents"],
+  "additionalProperties": false,
+  "properties": {
+    "tags": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/TagEntry"
+      }
+    },
+    "skills": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "#/$defs/SkillEntry"
+      }
+    },
+    "agents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/AgentEntry"
+      }
+    }
+  },
+  "$defs": {
+    "TagEntry": {
+      "type": "object",
+      "required": ["canon", "aliases", "domain", "description", "weight", "is_active"],
+      "additionalProperties": false,
+      "properties": {
+        "canon": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "description": "Каноническое имя тега (lower-case, без #)"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Список синонимов (нормализуются → canon)"
+        },
+        "domain": {
+          "type": "string",
+          "enum": [
+            "golang", "python", "typescript", "db",
+            "devops", "docs", "qa", "review",
+            "orchestration", "security"
+          ],
+          "description": "Домен навыка"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 10.0,
+          "description": "Вес тега при скоринге матчинга"
+        },
+        "is_active": {
+          "type": "boolean"
+        }
+      }
+    },
+    "SkillEntry": {
+      "type": "object",
+      "required": ["skill", "agent", "tags", "weight", "is_active"],
+      "additionalProperties": false,
+      "properties": {
+        "skill": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Имя SKILL-директории (без пути)"
+        },
+        "agent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Агент-владелец (должен быть в agents[])"
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Канонические теги (все должны быть в tags[])"
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 10.0,
+          "description": "Приоритет навыка у агента"
+        },
+        "is_active": {
+          "type": "boolean"
+        }
+      }
+    },
+    "AgentEntry": {
+      "type": "object",
+      "required": ["agent", "model", "zone", "heavy", "is_active"],
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Имя агента (ключ для маршрутизации)"
+        },
+        "model": {
+          "type": "string",
+          "enum": ["opus", "sonnet"],
+          "description": "Модель Claude"
+        },
+        "zone": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Краткое описание зоны ответственности"
+        },
+        "heavy": {
+          "type": "integer",
+          "enum": [0, 1],
+          "description": "1 = Opus (тяжёлый), 0 = Sonnet (лёгкий)"
+        },
+        "is_active": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

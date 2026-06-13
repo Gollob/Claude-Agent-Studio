@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Task board for the dev studio in Trilium.
+# Structure: Dev Root → <Topic> → columns 1.Plan → 2.Doing → 3.Done → 4.Archive.
+# Columns are tagged: #devTheme=<slug> and #devCol=<slug>:<status>; topic root — #devThemeRoot.
+#
+# Usage:
+#   board.sh.example theme <slug> "<Display name>"        # create topic with 4 columns (idempotent)
+#   board.sh.example task  <slug> "<title>" ["<html>"]    # create task in Plan column
+#   board.sh.example move  <noteId> <slug> <plan|doing|done|archive>
+#   board.sh.example list  [<slug>]                        # list topics / tasks by column
+#
+# Required env vars:
+#   TRILIUM_ETAPI_BASE        — Trilium ETAPI base URL (default: http://localhost:8080/etapi)
+#   TRILIUM_ETAPI_TOKEN_FILE  — path to file containing the ETAPI token
+#   DEV_ROOT_NOTE_ID          — noteId of the "Dev" root note (your board root)
+#   TRILIUM_HOST_URL          — base URL for generating note links (default: http://localhost:8080)
+set -euo pipefail
+
+BASE="${TRILIUM_ETAPI_BASE:-http://localhost:8080/etapi}"
+TOKEN_FILE="${TRILIUM_ETAPI_TOKEN_FILE:?TRILIUM_ETAPI_TOKEN_FILE env var required — path to ETAPI token file}"
+DEV_ROOT="${DEV_ROOT_NOTE_ID:?DEV_ROOT_NOTE_ID env var required — set it to your Dev board root noteId}"
+HOST_URL="${TRILIUM_HOST_URL:-http://localhost:8080}"
+[ -r "$TOKEN_FILE" ] || { echo "ERROR: ETAPI token file not found: $TOKEN_FILE" >&2; exit 1; }
+TOK="$(cat "$TOKEN_FILE")"
+
+declare -A TITLE=( [plan]="1. Plan" [doing]="2. Doing" [done]="3. Done" [archive]="4. Archive" )
+ORDER=(plan doing done archive)
+
+api(){ curl -sS -H "Authorization: $TOK" "$@"; }
+post(){ api -X POST "$BASE/$1" -H "Content-Type: application/json" -d "$2"; }
+search(){ api -G "$BASE/notes" --data-urlencode "search=$1" | jq -r '.results[].noteId'; }
+mknote(){ post create-note "$(jq -n --arg p "$1" --arg t "$2" --arg c "$3" '{parentNoteId:$p,type:"text",title:$t,content:$c}')" | jq -r '.note.noteId'; }
+addlabel(){ post attributes "$(jq -n --arg n "$1" --arg k "$2" --arg v "$3" '{noteId:$n,type:"label",name:$k,value:$v,isInheritable:false}')" >/dev/null; }
+col_id(){ search "#devCol=\"$1:$2\"" | head -1; }
+
+cmd="${1:-}"; shift || true
+case "$cmd" in
+  theme)
+    slug="${1:?usage: theme <slug> \"name\"}"; name="${2:?display name required}"
+    if [ -n "$(col_id "$slug" plan)" ]; then echo "topic '$slug' already exists"; exit 0; fi
+    th="$(mknote "$DEV_ROOT" "$name" "<p>Dev topic. Stage columns: <b>Plan → Doing → Done → Archive</b>.</p>")"
+    addlabel "$th" devTheme "$slug"; addlabel "$th" devThemeRoot "$slug"
+    for s in "${ORDER[@]}"; do
+      c="$(mknote "$th" "${TITLE[$s]}" "<p></p>")"
+      addlabel "$c" devTheme "$slug"; addlabel "$c" devCol "$slug:$s"
+    done
+    echo "theme created: $th (slug=$slug)" ;;
+  task)
+    slug="${1:?usage: task <slug> \"title\" [html]}"; title="${2:?title required}"; html="${3:-<p></p>}"
+    plan="$(col_id "$slug" plan)"
+    [ -n "$plan" ] || { echo "ERROR: topic '$slug' not found — create it first: board.sh.example theme $slug \"<name>\"" >&2; exit 1; }
+    nid="$(mknote "$plan" "$title" "$html")"
+    theme="$(api "$BASE/notes/$plan" | jq -r '.parentNoteIds[0]')"
+    echo "task: $nid"
+    echo "url:  $HOST_URL/#root/$DEV_ROOT/$theme/$plan/$nid" ;;
+  move)
+    nid="${1:?noteId}"; slug="${2:?slug}"; st="${3:?plan|doing|done|archive}"
+    [ -n "${TITLE[$st]:-}" ] || { echo "ERROR: invalid status '$st' (plan|doing|done|archive)" >&2; exit 1; }
+    tgt="$(col_id "$slug" "$st")"; [ -n "$tgt" ] || { echo "ERROR: column $slug:$st not found" >&2; exit 1; }
+    post branches "$(jq -n --arg n "$nid" --arg p "$tgt" '{noteId:$n,parentNoteId:$p}')" >/dev/null
+    for id in $(search "#devTheme=\"$slug\""); do
+      [ "$id" = "$tgt" ] && continue
+      api -o /dev/null -X DELETE "$BASE/branches/${id}_${nid}" || true
+    done
+    echo "moved $nid -> $slug:$st" ;;
+  list)
+    if [ -n "${1:-}" ]; then
+      slug="$1"
+      for s in "${ORDER[@]}"; do
+        echo "## ${TITLE[$s]}"
+        c="$(col_id "$slug" "$s")"
+        [ -n "$c" ] && api "$BASE/notes/$c" | jq -r '.childNoteIds[]?' | while read -r t; do
+          api "$BASE/notes/$t" | jq -r '"  - "+.title+" ("+.noteId+")"'; done
+      done
+    else
+      echo "Topics:"
+      for id in $(search "#devThemeRoot"); do api "$BASE/notes/$id" | jq -r '"  - "+.title+" ("+.noteId+")"'; done
+    fi ;;
+  *) echo "usage: board.sh.example {theme <slug> \"name\" | task <slug> \"title\" [html] | move <noteId> <slug> <plan|doing|done|archive> | list [slug]}" >&2; exit 2 ;;
+esac
