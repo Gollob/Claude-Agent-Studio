@@ -10,7 +10,7 @@ validate.py — валидатор tagcatalog/tags.yaml
   6. Дубли имён навыков (skill)
   7. Дубли имён агентов (agent)
 
-Зависимости: python3 + jsonschema + pyyaml (оба есть на agent-vm).
+Зависимости: python3 + jsonschema + pyyaml.
 Выход: 0 = OK, 1 = ошибки найдены.
 Использование: python3 validate.py [path/to/tags.yaml]
 """

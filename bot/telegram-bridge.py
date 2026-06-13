@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# telegram-bridge.py — thin entry point for agent-vm Telegram-Claude bridge.
+# telegram-bridge.py — thin entry point for the Telegram-Claude bridge (this project).
 #
 # Loads tgbridge package from RUNTIME_DIR (TG_BRIDGE_RUNTIME env var, default
-# ~/agent/tg-bot-runtime) or from the directory containing this file (dev/test).
+# ~/agents) or from the directory containing this file (dev/test).
 # Then imports main() from tgbridge.app and re-exports public symbols so that
 # flat access _bridge.<name> in tests resolves to the canonical module objects.
 #
@@ -27,7 +27,7 @@ from pathlib import Path
 
 RUNTIME_DIR: str = os.environ.get(
     "TG_BRIDGE_RUNTIME",
-    os.path.expanduser("~/agent/tg-bot-runtime"),
+    os.path.expanduser("~/agents"),
 )
 if RUNTIME_DIR not in sys.path:
     sys.path.insert(0, RUNTIME_DIR)

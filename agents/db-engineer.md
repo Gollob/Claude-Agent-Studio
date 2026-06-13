@@ -12,7 +12,7 @@ model: sonnet
 - **sql-pro** — продвинутый SQL.
 
 ## Среда
-ClickHouse 26.5 в контейнере clickhouse (HTTP 8123, native 9000, user default, access management on), стек ~/agent/stacks/clickhouse. База знаний команды — БД knowledge (skills, articles).
+ClickHouse 26.5 в контейнере clickhouse (HTTP 8123, native 9000, user default, access management on), стек — your ClickHouse stack. База знаний команды — БД knowledge (skills, articles).
 
 ## ClickHouse-конвенции
 - Движки MergeTree-семейства; для upsert/идемпотентности — ReplacingMergeTree(version). Продуманный ORDER BY (по частым фильтрам), партиционирование по времени при больших объёмах.

@@ -32,6 +32,8 @@ type Shutdown func(ctx context.Context) error
 //
 //	OTEL_EXPORTER_OTLP_ENDPOINT  — gRPC endpoint (e.g. http://uptrace:4317)
 //	OTEL_SERVICE_NAME             — service name (default: "task-router")
+//	OTEL_SERVICE_NAMESPACE        — service namespace (default: "agent-studio")
+//	OTEL_DEPLOYMENT_ENV           — deployment environment (default: "dev")
 //	OTEL_RESOURCE_ATTRIBUTES      — extra resource attrs (k=v,k=v)
 //	UPTRACE_PROJECT_TOKEN         — Uptrace project token (sets uptrace-dsn header)
 //
@@ -76,11 +78,21 @@ func Init(log *slog.Logger) (Shutdown, error) {
 		return func(ctx context.Context) error { return nil }, nil //nolint:nilerr
 	}
 
+	serviceNamespace := os.Getenv("OTEL_SERVICE_NAMESPACE")
+	if serviceNamespace == "" {
+		serviceNamespace = "agent-studio"
+	}
+
+	deploymentEnv := os.Getenv("OTEL_DEPLOYMENT_ENV")
+	if deploymentEnv == "" {
+		deploymentEnv = "dev"
+	}
+
 	res := resource.NewWithAttributes(
 		semconv.SchemaURL,
 		semconv.ServiceName(serviceName),
-		semconv.ServiceNamespace("agent-vm"),
-		semconv.DeploymentEnvironment("prod"),
+		semconv.ServiceNamespace(serviceNamespace),
+		semconv.DeploymentEnvironment(deploymentEnv),
 	)
 
 	tp := sdktrace.NewTracerProvider(

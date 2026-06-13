@@ -367,18 +367,18 @@ class TestHttpTracesEndpoint:
 
     def test_explicit_without_path(self):
         """Explicit endpoint without /v1/traces → path gets appended."""
-        result = self._fn("http://192.168.1.10:14318")
-        assert result == "http://192.168.1.10:14318/v1/traces"
+        result = self._fn("http://192.0.2.10:14318")
+        assert result == "http://192.0.2.10:14318/v1/traces"
 
     def test_explicit_with_trailing_slash(self):
         """Explicit endpoint with trailing slash → no double slash before path."""
-        result = self._fn("http://192.168.1.10:14318/")
-        assert result == "http://192.168.1.10:14318/v1/traces"
+        result = self._fn("http://192.0.2.10:14318/")
+        assert result == "http://192.0.2.10:14318/v1/traces"
 
     def test_explicit_already_has_path(self):
         """Explicit endpoint that already ends with /v1/traces → not duplicated."""
-        result = self._fn("http://192.168.1.10:14318/v1/traces")
-        assert result == "http://192.168.1.10:14318/v1/traces"
+        result = self._fn("http://192.0.2.10:14318/v1/traces")
+        assert result == "http://192.0.2.10:14318/v1/traces"
         assert result.count("/v1/traces") == 1
 
     def test_explicit_with_trailing_slash_and_path(self):

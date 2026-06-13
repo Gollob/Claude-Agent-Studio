@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "dev"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # ── Secret scanning (gate — must pass before anything ships) ─────────────────
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Python — bot (lint + pytest) ────────────────────────────────────────────
+  python-bot:
+    name: Python / bot
+    needs: gitleaks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install \
+            python-telegram-bot \
+            httpx \
+            opentelemetry-sdk \
+            opentelemetry-exporter-otlp-proto-grpc \
+            opentelemetry-instrumentation-httpx \
+            ruff \
+            pytest
+      - name: Lint (ruff)
+        run: ruff check .
+      - name: Tests
+        run: pytest tests/ -q --tb=short
+
+  # ── Python — services/file-intake (lint + syntax check) ──────────────────────
+  python-file-intake:
+    name: Python / file-intake
+    needs: gitleaks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/file-intake/app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: pip install --upgrade pip -r requirements.txt ruff
+      - name: Lint (ruff)
+        run: ruff check .
+      - name: Syntax check
+        run: python3 -m py_compile main.py trilium.py handlers/audio.py handlers/image.py handlers/pdf.py
+
+  # ── Go — services/task-router (build + test) ─────────────────────────────────
+  go-task-router:
+    name: Go / task-router
+    needs: gitleaks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/task-router
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: services/task-router/go.mod
+          cache: true
+      - name: Build
+        run: go build ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Test
+        run: go test ./... -count=1 -timeout 60s

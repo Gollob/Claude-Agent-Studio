@@ -1,6 +1,6 @@
 # task-router
 
-Детерминированный роутер задач для Dev Studio (agent-vm).
+Детерминированный роутер задач для Dev Studio.
 
 ## Назначение
 
@@ -15,7 +15,7 @@
 
 ## Спека
 
-`~/agent/dev/openspec/changes/add-task-router/`
+`openspec/changes/add-task-router/`
 
 ## Структура каталогов
 
