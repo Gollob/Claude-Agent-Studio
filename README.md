@@ -30,23 +30,23 @@ and prefer Telegram as the control plane rather than a web UI.
 
 ```mermaid
 flowchart TD
-    U([User / Telegram])
-    BOT["bot/\nTelegram bridge\n(Python, long-poll)"]
-    TR["services/task-router\n(Go, :8092)"]
-    FI["services/file-intake\n(FastAPI + Whisper, :8090)"]
-    AG["agents/\n9 Claude sub-agents\n(claude CLI, headless)"]
-    DB[(SQLite\naudit log)]
-    OT[OpenTelemetry\ncollector\n(optional)]
+    U(["User / Telegram"])
+    BOT["bot/<br/>Telegram bridge<br/>(Python, long-poll)"]
+    TR["services/task-router<br/>(Go, :8092)"]
+    FI["services/file-intake<br/>(FastAPI + Whisper, :8090)"]
+    AG["agents/<br/>9 Claude sub-agents<br/>(claude CLI, headless)"]
+    DB[("SQLite<br/>audit log")]
+    OT["OpenTelemetry<br/>collector (optional)"]
 
     U -- "text / voice / file" --> BOT
-    BOT -- "POST /route\n#tag text" --> TR
-    TR -- "RouteTarget\n{agent, cwd}" --> BOT
-    BOT -- "claude -p\nin agent cwd" --> AG
+    BOT -- "POST /route<br/>#tag text" --> TR
+    TR -- "RouteTarget<br/>{agent, cwd}" --> BOT
+    BOT -- "claude -p<br/>in agent cwd" --> AG
     AG -- "stdout reply" --> BOT
     BOT -- "send_message" --> U
 
-    BOT -- "POST /process\nmedia bytes" --> FI
-    FI -- "whisper STT\nClaude vision/text" --> AG
+    BOT -- "POST /process<br/>media bytes" --> FI
+    FI -- "whisper STT<br/>Claude vision/text" --> AG
     FI -- "structured note" --> BOT
 
     TR -- "routing log" --> DB
